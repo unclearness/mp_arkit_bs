@@ -38,7 +38,6 @@ class FaceMeshDetector:
     def mp_callback(self, mp_result, output_image, timestamp_ms: int):
         if len(mp_result.face_landmarks) >= 1 and len(
                 mp_result.face_blendshapes) >= 1:
-            print(mp_result)
             self.landmarks = mp_result.face_landmarks[0]
             self.blendshapes = [(b.category_name, b.score)
                                 for b in mp_result.face_blendshapes[0]][1:]  # 0 is _neutral
@@ -55,7 +54,7 @@ class FaceMeshDetector:
         return self.landmarks, self.blendshapes
 
 
-def on_trackbar():
+def on_trackbar(val):
     pass
 
 
@@ -122,20 +121,21 @@ def main():
 
     facemesh_detector = FaceMeshDetector()
     cap = cv2.VideoCapture(0)
-    window_title = "mediapipe ARKit 52 blendshapes"
-    cv2.namedWindow(window_title, cv2.WINDOW_NORMAL)
-
+    bs_trackbar_window_title = "mediapipe ARKit 52 blendshapes"
+    cv2.namedWindow(bs_trackbar_window_title, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(bs_trackbar_window_title, 640, 1290)
     while True:
         ret, frame = cap.read()
         facemesh_detector.update(frame)
         landmarks, blendshapes = facemesh_detector.get_results()
         if (landmarks is None) or (blendshapes is None):
             continue
-        show_blendshape_trackbars(window_title, blendshapes)
+        show_blendshape_trackbars(bs_trackbar_window_title, blendshapes)
         draw_livestream_landmarks(frame, landmarks)
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
